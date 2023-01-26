@@ -1,0 +1,378 @@
+常用请求头信息
+	user-agent：请求载体的身份表示
+	Connection：请求完毕后，是断开链接还是保持链接
+常用响应头信息
+	Content-Type：服务器响应会客户端的数据类型
+
+http协议：服务器和客户端进行数据交互的一种形式
+https协议：安全的超文本传输协议
+加密方式：对称密钥加密
+	非对称密钥加密
+	证书密钥加密
+
+安装模块：方式一: 在cmd中输入‘pip install 要安装的模块名’
+	之后输入‘pip show 安装的模块名’查看安装的位置
+	将安装好的模块文件复制到工程下的venv/Lib/site-packages目录下
+	
+	方式二：在pycharm中 Settings-Project:工程名-Project Interpreter直接搜索安装
+
+urllib步骤：
+	url=''   # 字符串类型
+	headers={}  # 字典类型
+	request=urllib.request.Request(url,headers)
+	response=urllib.request.urlopen(request)
+	html=response.read().decode('utf-8')
+
+requests步骤:
+ get:	response=requests.get(url,params,headers)
+	html=response.text  # 字符串类型   /   obj=response.json()  # 对象类型  /  response.content  # 二进制类型数据
+ post:	response=requests.post(url,data,headers)
+	html=response.text  # 字符串类型   /   obj=response.json()  # json类型
+
+爬虫通用处理中文乱码的解决方案
+response.encoding='utf-8'  # 给拿到整个网页对象重新编码
+str1.encode('iso-8859-1').decode('gbk')  # 给出现乱码的字符串重新编码
+
+数据解析：
+正则:import re
+
+bs4：from bs4 import BeautifulSoup
+将本地的html文档数据加载到对象中：
+	fp=open('./test.html','r',encoding='utf-8')
+	soup=BeatifulSoup(fp,'lxml')  # 第二个参数是解析器，解析html文件就是lxml
+从互联网上获取的页面源码加载到对象中
+	page_text=response.text
+	soup=BeatifulSoup(page_text,'lxml')
+  常用方法：soup.标签名 = soup.find(标签名) 例：soup.a/soup.find('a') 返回html中第一次出现的a标签
+	  通过属性定位: soup.find(标签名，属性)  例：soup.fine('div',class_='song')	
+	  soup.find_all()  例：soup.find_all('a') 返回包含所有a标签的一个列表
+	  soup.select(选择器)  例：soup.select('.tang')  .是类选择器 返回一个包含所有符合选择器的标签的列表
+	  获取标签中的文本：直接在定位好的标签后加    .text/.get_text()/.string   前两个可以获取标签中的所有文本内容，string只能获取标签下的直系文本内容
+	  获取标签中的属性：直接在定位好的标签后加    ['属性名']          例：soup.a.text/soup.a['href']
+
+xpath：1、实例化一个etree对象，将被解析的页面源码数据加载到该对象中
+	from lxml import etree
+	1）本地html文档：
+		tree=etree.parse(filePath)
+	2)互联网上的源码数据
+		tree=etree.HTML('page_text')
+	2、调用etree对象中的xpath方法结合着xpath表达式实现标签的定位和内容的捕获
+		tree.xpath('xpath表达式')
+xpath表达式：会返回符合要求的所有标签，永远返回一个列表
+	/：开头第一个斜杠表示从根目录开始，一个斜杠表示一个层级
+	//div：在表达式中间表示多个层级，在开头表示可以从任意位置定位
+	属性定位：//div[@class=""]      TagName[@AttrName='']
+	索引定位(从1开始)：//div[@class=""]/p[3]   div下的第三个p标签   如果要取最后一个标签的话可以p[last()]
+	文本定位：xpath("//a[text()='文本内容']")
+	取文本：/text()    只能取到直系存储的文本会返回一个列表，可以在返回的列表中加个[0]   //text()  可以去到标签中非直系（所有）的文本内容
+	取属性：/@属性名  返回一个列表    例：//a/@href
+
+验证码：一种反爬机制  需要识别验证码图片中的数据，用于模拟登录操作
+获取验证码图片时会遇到发送多次请求导致验证码不同步的问题，此时可以用session对象来发送请求
+识别验证码：1、程序员人工肉眼识别。
+	2、第三方自动识别
+
+获取响应状态码：response.status_code   可以用于检查是否成功获取到网页
+
+http/https协议是无状态的，即不会保留登录信息
+
+session对象：这个对象代表一次用户会话：从客户端浏览器连接服务器开始，到客户端浏览器与服务器断开。
+	    会话能让我们在跨请求的时候保持某些参数，比如在同一个session实例发出的所有请求之间保持cookie信息。
+cookie：用来让服务端记录客户端的登录信息
+	手动处理：复制抓包工具中的cookie值
+	自动处理：session会话对象：可以进行请求的发送，如果请求过程中产生了cookie，会被自动储存在session对象中
+		session=requests.Session()
+		response=session.post(url,headers,data)
+		session.get(登陆页面_url,headers)   (session中携带了cookie)
+
+代理：      相关网站：快代理、西祠代理、www.goubanjia.com
+	代理类型：http：应用到http协议对应的url中
+		https：应用到https协议对应的url中
+	使用案例：requests.get(url,headers,proxies={"代理类型(http/https)":"ip(在网站中找)"})   例：proxies={"http":"58.253.154.101:9999"}
+	匿名度：透明：服务器知道该次请求使用了代理，也知道请求对应的真实ip
+		匿名：服务器知道使用了代理，但不知道真实ip
+		高匿：服务器不知道使用了代理
+
+高性能异步爬虫：get方法是一个阻塞的方法，单线程会等待阻塞方法完成之后再执行后续代码
+异步爬虫的方式：
+	多线程，多进程：无法无限制开启多线程或多进程
+	线程池，进程池：降低系统对进程或线程创建和销毁的频率，从而很好的降低系统的开销
+		          但是池中线程或进程的数量是有上限的
+		          线程池处理的是阻塞且较为耗时的操作
+	单线程+异步协程：
+线程池的基本使用：
+	1、导入模块
+	from multiprocessing.dummy import Pool
+	2、实例化一个线程池对象
+	pool=Pool(num)   # num表示线程池中的线程数量，自由设定
+	3、将列表中的每一个元素进行处理
+	pool.map(func,可迭代对象)   func为将要发生阻塞的操作，函数名不需要加括号   可迭代对象即要传入的所有参数 最终返回一个列表，包含所有返回值
+
+协程异步：申请要使用异步模块aiohttp，不能使用同步模块requests的代码
+
+aiohttp:get与post方法与requests中基本相同，设置代理用 proxy="字符串类型的ip" 例：session.get(url,headers=headers,proxy="http://ip:port")
+async with aiohttp.ClientSession() as session: 
+        async with await session.get(url,headers=headers) as response:
+            page_text=await response.text() 
+
+基础操作：
+import aiohttp
+import asyncio
+
+urls=[
+    'https://www.baidu.com',
+    'http://www.bilibili.com'
+]
+headers={
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'
+}
+async def get_page(url):
+    async with aiohttp.ClientSession() as session:  # 需要用aiohttp中的ClientSession对象申请数据
+        async with await session.get(url,headers=headers) as response:
+            # 在获取相应数据操作之前一定要使用await手动挂起
+            page_text=await response.text() # 获取二进制数据：response.read()   获取json对象：response.json()
+
+tasks=[]
+# 获取loop对象
+loop=asyncio.get_event_loop()
+for url in urls:
+    c = get_page(url)
+    task=loop.create_task(c)
+    tasks.append(task)
+# run函数中只能放协程对象、task、future，不能直接放列表，而要将其封装到wait中
+loop.run_until_complete(asyncio.wait(tasks))
+
+selenium模块：基于浏览器自动化的一个模块
+	可以边界的获取网站中动态加载的数据，可以便捷实现模拟登录
+selenium基本操作：from selenium import webdriver
+	# 实例化一个浏览器对象（传入浏览器的驱动程序）
+	bro = webdriver.Chrome(excutable_path='./chromedriver')
+	# 让浏览器发起一个get请求
+	bro.get('url')
+	# 关闭浏览器
+	bro.quit()
+常用操作：bro.page_source  # 获取浏览器当前页面的源码数据（包括动态加载出来的）
+	bro.back()  # 回退操作
+	bro.forward() # 前进操作
+	bro.save_screenshot('image_path')  # 将当前整张页面进行截图并保存，png格式
+	bro.maximize_window()  # 最大化浏览器页面，在无头浏览器中不能用
+	bro.set_window_size(x,y)  # 设置浏览器大小，无头浏览器也可设置
+	div=bro.find_element_by_xx  # 标签定位，也可以by_xpath
+	# 标签定位完后
+	div.click()  # 点击定位到的标签元素
+	div.send_keys('')  # 向文本框中输入
+	div.location  # 对应标签（图片）区域的左上角坐标 返回字典类型，key是x和y
+	div.size  # 对应标签的长和宽  返回字典类型，key是width和height
+
+iframe：如果定位的标签时存在于iframe之中（html中的另一个html子页面）的则必须通过如下的操作改变标签定位的作用域
+	bro.switch_to.frame("frame的id值")  # 切换标签定位的作用域，切换至了子页面中
+	
+动作链：一系列连续的动作
+基本操作：from selenium.webdriver import ActionChains
+	# 实例化一个action对象
+	action=ActionChains(chorme)  # 参数是一个浏览器对象
+	action.release()  # 释放动作链
+常用方法：action.click_and_hold(div)  # 点击并长按，div是要操作的标签。
+	action.move_by_offset(x,y)  # 移动多少像素，x，y是像素值，都必须填写
+	action.move_to_element_with_offset(div,x,y) #  将鼠标以div标签为参照物（在div标签内）移动至x,y
+	.perform()  # 跟在一个方法后让其立即执行
+
+无头浏览器：使selenium运行时的浏览器没有可视化界面，推荐使用谷歌
+代码：只需要在使用的时候粘贴就可以了
+from selenium.webdriver.chrome.options import Options
+
+options=Options()
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
+
+chrome=webdriver.Chrome(executable_path='./chromedriver',options=options)
+
+框架：集成了很多功能并且具有很强通用性的一个项目模板
+scrapy框架：
+创建工程：1、scrapy startproject 项目名称
+	2、在spiders子目录下创建一个爬虫文件，先cd定位到工程目录下
+	      scrapy genspider spiderName(爬虫文件名称) www.xxx.com(可以随便填写)
+执行工程：scrapy crawl spiderName （--nolog表示只打印程序中的输出语句，不打印日志，也不会报错，不推荐使用）
+setting.py：框架中的设置文件
+	  LOG_LEVEL='ERROR'表示只输出错误日志
+	  ROBOTSTXT_OBEY=False  表示不遵从robot协议，默认为True
+	  USER_AGENT = ''  UA伪装
+数据处理：response可以直接使用xpath，但返回的是列表元素是Selector类型的对象
+	需要使用extract（）将Selector对象中的data参数存储的字符串提取出来
+	列表也可以直接调用extract（） 列表调用了extract()之后，则表示将列表中每一个Selector对象中data对应的字符串提取出来，也会返回一个列表
+	列表调用extract_first()表示提取第一个Selector对象中的data数据，用于只有一个Selector对象中
+
+持久化存储：
+基于终端指令：只可以将parse方法的返回值存储到本地的文本文件（不可以存储到数据库中）中
+	       持久化存储对应的文本文件的类型只可以为：'json', 'jsonlines', 'jl', 'csv', 'xml', 'marshal', 'pickle'
+	       指令：scrapy crawl xxx -o filePath
+基于管道：编码流程：
+	1、数据解析
+	2、在item类中定义相关的属性
+		属性名=scrapy.Fiele()
+	3、将解析的数据封装存储到item类型的对象
+		from 工程名.items import 工程名Item
+		item=工程名Item()  # 实例化一个item对象
+		item['属性名']=属性
+	4、将item类型的对象提交给管道进行持久化存储的操作
+		yield item
+	5、在管道类的process_item中要将其接收到的item对象进行持久化存储
+		fp=None
+		重写父类 open_spider(self,spider)方法打开一个文件fp
+		属性=item['属性名']
+		self.fp.write()
+		return item  # 会传递给下一个即将被执行的管道类，怕中文件提交的item指挥给管道文件中第一个被执行的管道类中
+		重写父类 close_spider(self.spider)方法关闭文件
+	6、在配置文件(settings.py)中开启管道
+		将ITEM_PIPELINES打开，数字代表管道的优先级，可以有多个管道
+	判断item类型：item.__class__.__name__可以得到item的类名
+
+多个管道：管道文件中一个管道类对应将一组数据存储到一个平台或者载体当中
+	如果要将数据存储多个平台就需要创建多个管道，在pipelines中创建一个管道类，并在setting文件的ITEM_PIPELINES中添加管道
+	item只会传给先执行（优先级较高）的管道，管道类中的return item会将接收到的item对象传给下一个将要执行的管道类
+
+基于spider的全站数据爬取：就是将网站中某板块中的全部页码所对应的页面的数据都爬取
+实现方式：1、将所有的页面url都写入start_url列表中
+	2、手动向指定url发请求：
+		yield scrapy.Request(url=new_url,callback=self.parse)
+		callback是回调函数，专门用于数据解析，这行代码在parse函数中相当于递归调用parse
+
+scrapy五大核心组件:
+spider：1、将url封装成请求(Request对象)  2、数据解析  3、将解析完的数据封装成item
+引擎（核心）：1、数据流处理  2、触发事务
+调度器：过滤器：去除重复网址   队列：将发来的请求排序并加入队列中
+下载器：用于下载网页内容，并以response对象的形式返回给引擎（建立在twisted这个高效的异步模型上）
+管道：将item对象持久化存储
+
+请求传参：使用场景：爬取解析的数据不在同一张页面中（深度爬取）
+	yield scrapy.Request(detail_url,callback=self.parse_detail,meta={'item',item})  # meta只能是一个字典
+	在parse_detail函数中就可以用response.meta['item']获取item对象
+
+format函数：format('包含%的字符串'%'要替换的内容')
+
+ImagesPipeline：专门用于图片数据爬取
+	           只需要将img的src提交到管道，管道就会对图片的src进行请求发送获取图片的二进制类型的数据，且还会进行持久化存储
+基本用法：1、在pipelines文件中创建一个新类，并且这个类继承于ImagesPipeline：
+		from scrapy.pipelines.images import ImagesPipeline  # 导入ImagesPipeline类
+	2、重写父类的三个方法：
+		def get_media_requests(self,item,info):  # 根据图片地址进行图片数据的请求
+			yield scrapy.Request(item['src'])
+		def file_path(self,request,response=None,info=None):  # 指定图片存储的路径  request即get_media_requests方法中发送请求的request对象
+			# 图片路径的设置在settings文件中添加 IMAGES_STORE属性指定文件夹
+			imgName=''
+			return imgName
+		def item_completed(self,results,item,info):
+			return item  # 返回给下一个即将被执行的管道类	
+	3、开启管道类并将类名改为设定的类名
+
+中间件：在middlewares文件中设置，在settings文件中打开DOWNLOADER_MIDDLEWARES
+爬虫中间件：引擎与spider之间
+下载中间件：引擎与下载器之间
+	作用：批量拦截到整个工程中发起的所有的请求的响应
+	拦截请求：UA伪装，给不同的请求设置不同UA  代理IP的设置   
+	拦截响应：篡改响应数据，响应对象
+拦截请求：process_request函数中：拦截正常请求
+	   request.headrs['User-Agent'] = random.choice(self.user_agent_list)  # UA池
+	process_exception函数中：拦截异常请求
+	   if request.url.split(':')[0] == 'http':   #对协议头进行判断
+	       request.meta['meta'] = 'http://ip:iport'   # 最好也用一个ip池随机设置
+	   return request # 将修正之后的请求进行重新发送
+拦截响应：可以将selenium作用与scrapy框架中
+	process_response函数中：拦截响应对象
+	如果要用selenium，在爬虫文件中重写__init__方法实例化浏览器对象，在拦截响应的函数中用spider.chrome获取对象
+	from scrapy.http import HtmlResponse  # 导包
+	# 实例化一个新的响应对象 body即为符合要求的动态网页
+	new_response=HtmlResponse(url=request.url,body=page_text,encoding='utf-8',request=request)
+	return new_response
+
+CrawlSpider：是一个Spider的一个子类，用于全站数据爬取
+基本用法：创建爬虫文件：scrapy genspider -t crawl xxx www.xxx.com
+LinkExtractor常见参数：deny：满足正则的url不会被提取（优先级高于allow）	allow_domains/deny_domains允许/不允许被提取的链接
+		restrict_xpaths:xpath满足范围的url地址会被提取
+
+xpath表达式中不可以出现tbody标签
+
+分布式爬虫：搭建一个分布式的机器，让其对一组资源进行分布联合爬取
+	   作用：提升爬取数据的效率
+	   基本操作：安装scrapy-redis组件	保证分布式机群共享同一个调度器，管道
+		   创建一个基于CrwalSpider的爬虫文件
+	   修改当前爬虫文件：
+		   导包：from scrapy_redis.spiders import RedisCrawlSpider
+		   将当前爬虫类的父类改成RedisCrawlSpider
+		   将start_urls和allowed_domains注释
+	 	   添加一个新属性：redis_key  可以被共享的调度器队列的名称
+	    修改配置文件settings：
+		   指定使用可以被共享的管道：
+		   指定调度器：
+		   指定redis服务器：
+	    redis相关操作配置：redis配置文件：redis.windows.conf
+		   将bind 127.0.0.1 注释删除
+		   关闭保护模式：protected-mode no
+		   结合配置文件开启redis服务：    redis-sever 配置文件
+		   启动客户端：  redis-cli
+	    执行工程：scrapy runspider 爬虫源文件的名称.py
+		    向调度器的队列中放入一个起始url： lpush 队列名称 www.xxx.com
+
+增量式爬虫：监测网站数据更新的情况并爬取网站最新更新出来的数据。
+	核心：检测url之前有没有请求过：将爬取过的url存储到redis的set数据结构中
+		self.conn.sadd('urls',detail_url)  # 之前没存在返回1，存在就返回0
+
+scrapy shell www.xxx.com 
+
+
+logging模块：import logging      logging可以将错误日志输出，或保存到本地
+	logging.warning(item)   item是要输出的内容，和print类似，只不过是以日志格式输出
+	logger = logging.getLogger(__name__)     logger.warning(item)     可以记录输出信息的文件名  __name__默认是当前文件名
+		logger对象一个文件中实例化一个即可
+	LOG_FILE = './log.log'    在setting文件中添加该属性即可将日志保存在本地，终端不会显示内容
+	
+	在其他工程文件中（非scrapy）：
+	import logging
+	logging.basicConfig()  # 设置日志格式 可以直接去网上copy
+	logger = logging.getLogger(__name__)
+	在一个文件A中实例化一个logger对象在其他文件中就可以直接调用
+	from A import logger
+	    
+scrapy.Request中的参数：url	callback	method='GET'/'POST'	body如果是post请求的话需要请求体
+			meta	headers	cookies专门设立了cookies属性就不能放在headers中	dont_filter：不过滤重复地址，默认为False即过滤重复地址，置为True即可达到重复请求的效果，可以用于不断更新的网页
+
+列表推导式：将A加到listA开头：listA=[A + i for i in listA]
+
+scrapy shell：直接在终端scrapy shell 网址   即可进入一个交互式终端  可以直接查看网页中的一些信息，比如二进制源码是response.body，也可以调试xpath 用response.xpath()看看能不能取到数据
+
+模拟登录：		    
+1、携带cookies登录：
+重写start_requests(self)函数，在里面对start_urls中的请求进行修改
+start_requests(self):		    
+	start_urls=''
+	yield scrapy.Request(start_urls,callback,cookies=)	
+可以在settings文件中添加COOKIES_DEBUG = True来查看cookie的传递过程
+
+2、post请求：yield scrapy.FormRequest(url,formdata,callback)
+yield scrapy.FormRequest.from_response(
+	response  # 自动从登陆页面对应的response中寻找form表单，formdata中只要有用户名密码就可以了
+	formdata={"login":"用户名","password":"密码"}   键名是网页中input标签的name对应的值
+	callback	
+)
+
+
+
+scrapy_redis:scrapy基于redis的一个组件
+额外实现的功能：request去重（增量式爬虫），爬虫持久化，分布式爬虫
+redis会和调度器和管道相连，与调度器双向传输request对象
+redis中会存待爬取的request对象和已经爬取过的request对象的指纹
+
+实现redis：在settings文件中添加
+DUPEFILTER_CLASS="scrapy_redis.dupefilter.RFPDupeFilter"
+SCHEDULER="scrapy_redis.scheduler.Scheduler"
+SCHEDULER_PERSIST=True
+ITEM_PIPELINES={
+	'scrapy_redis.pipelines.RedisPipeline':400,  # 在原管道基础上添加
+}
+
+REDIS_URL = "redis://127.0.0.1:6379"  # 本机上的redis数据库地址
+
+自动补充完整url：
+import urllib
+urllib.parse.urljoin(response.url,next_url)  # 通过前面的url将后面的url补充完整
+
