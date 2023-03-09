@@ -376,6 +376,18 @@ ref可以是分支、tag，不指定的话默认是HEAD当前位置
 
 ## 4.3 远程仓库操作
 
+向Github仓库中远程操作时，需要给GitBash设置代理
+
+`git config --global http.proxy http://127.0.0.1:7890`
+
+`git config --global https.proxy https://127.0.0.1:7890`
+
+取消git bash的代理：
+
+`git config --global --unset http.proxy`
+
+`git config --global --unset https.proxy`
+
 ### 4.3.0 远程分支
 
 **什么是远程分支**
