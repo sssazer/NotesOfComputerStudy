@@ -226,6 +226,10 @@ pull：把远程数据库的内容更新到本地数据库
 
 还可以`git fetch origin :分支名`来创建分支
 
+### 4.2.1 删除分支
+
+`git branch -d branch_name`
+
 ### 4.2.2 切换分支
 
 `git checkout 分支名`
@@ -466,7 +470,17 @@ ref可以是分支、tag，不指定的话默认是HEAD当前位置
 
 **带参数用法**
 
+`git pull origin main`
 
+**可能出现的错误**
+
+- `fatal:refusing to merge unrelated histories`
+
+  当要拉取的远程分支和目前所在的本地分支没有任何关系时会报错。比如你在本地新建分支并进行了一些提交，想要拉取一个远程分支，而那个远程分支本身也有提交。那么这两个分支就毫无关系。
+
+  解决办法：在pull的末尾加上`--allow-unrelated-histories`
+
+  `git pull --allow-unrelated-histories`
 
 ### 4.3.4 git push
 

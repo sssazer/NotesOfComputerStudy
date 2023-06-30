@@ -904,6 +904,8 @@
 - 迭代器
 
     `set<T>::iterator it;`
+    
+    map和set都不能对end迭代器解引用
 ***
 **构造与赋值：**
 - 默认构造函数
@@ -1165,5 +1167,25 @@ public:
 map<int,int , MyCompare> m;
 ```
 
+## 3. 适配器
 
+### priority_queue
+
+``
+
+```C++
+template<
+	class T,
+	class Container = std::vector<T>,
+	class Compare = std::less<typename Container::value_type>
+>
+        
+priority_queue<int, vector<int>, greater<int>> pq;
+```
+
+在容器上面套一个优先队列的壳子，只能拿到最后一个元素，即top()元素。默认用less从小到大排序，只能拿到最大的元素
+
+- top()：获取队头元素
+- pop()：移除队头元素
+- push()：插入元素，插入后会自动重新排序
 
