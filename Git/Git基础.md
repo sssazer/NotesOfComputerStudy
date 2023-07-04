@@ -44,7 +44,9 @@ Git标准注释：
 
 下载安装完成之后，在开始菜单中搜索Git Bash并启动
 
-下面是一些基本操作：
+下面是一些基本配置：
+
+可以使用`git config --global --list`来查看所有配置
 
 - 配置用户信息，这些信息将作为提交者信息显示在更新历史中
 
@@ -63,6 +65,10 @@ Git标准注释：
 - 在Windows中将含非ASCII字符的文件名正确显示
 
   `$ git config --global core.quotepath off`
+
+- 制定commit时默认打开的文本编辑器
+
+  `$ git config --global core.editor vim`
 
 ## 2.2 创建本地数据库
 
