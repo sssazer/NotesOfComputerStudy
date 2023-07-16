@@ -82,6 +82,10 @@ rdd = sc.parallelize(range(10),5)
 rdd.foreach(lambda x : print(x)) # 将rdd中的所有数据打印
 ```
 
+### 2.1.6 count()
+
+返回RDD中的数据行数
+
 ## 2.2 Transformation on RDD
 
 Transformations construct a new RDD from a previous RDD
@@ -144,5 +148,112 @@ rdd.sortBy(lambda x:x[2]).collect() # 根据每个tuple中下标为2的元素排
 # [(4,1,1),(3,2,2),(1)]
 ```
 
+# 3. Spark SQL
 
+SparkSQL可以使用类似SQL的语言操作结构化数据，需要依赖两个概念：
 
+- DataFrame：
+- RDD Schema
+
+要在Python中使用SparkSQL，需要做以下配置：
+
+```python
+# Import Spark Library
+from pyspark import SparkConf, SparkContext, SQLContext
+from pyspark.sql.functions import *
+# runtime execution context for spark-submit
+appName = "Spark SQL Demo"
+conf = SparkConf().setAppName(appName)
+sc = SparkContext(conf=conf)
+sqlContext = SQLContext(sc)
+```
+
+## 3.1 Operation On Dataframe
+
+以下代码均以该表为例
+
+| Name   | age  |
+| ------ | ---- |
+| Alice  | 25   |
+| Bob    | 40   |
+| Camile | 13   |
+| David  | 35   |
+
+### 3.1.1 Creating Dataframe from RDD
+
+创建Dataframe需要一个RDD（保存数据）和schema（声明表头和每列对应的数据类型）
+
+**通过.csv文件创建DataFrame**
+
+```python
+rdd_person = sc.textFile("persion.csv")
+rdd_table = rdd_person.map(lambda line : line.split(";"))
+
+# 定义schema
+schema = types.StructType([
+	types.StructField('name', types.StringType(), True),
+    types.StructField('age', types.StringType(), True)
+])
+
+# 在该RDD上创建DataFrame
+df_persons = sqlContext.createDataFrame(rdd_table, schema)
+df_person.show() # 打印该dataframe
+```
+
+**通过文本类型文件创建DataFrame**
+
+```python
+df_txt = sqlContext.read.\
+format("csv").\  # 指定读入的文件类型是.csv
+option("delimiter"," ").\ # 每一行是表格中一行，以指定分隔符将一行分为多列
+schema(schema).\ # 指定每列的列名和数据类型
+load("filepath") # 指定要导入文件的路径
+```
+
+### 3.1.2 Extract info from DataFrame
+
+### 3.1.3 SQL Query
+
+做SQL Query之前要先给dataframe起个名字，这个名字就是表名，用于FROM后面
+
+`df_persons.registerTempTable("persons")`
+
+**直接用SQL语句做查询**
+
+```python
+result = sqlContext.sql("SELECT name FROM persons") # 返回一个包含查询结果的新的DataFrame
+for elem in result.collect():
+    print(elem.name)
+```
+
+**用pySqark API做查询**
+
+[API Docs](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html)
+
+以下函数均返回一个新的DataFrame，且可以链式使用
+
+- DataFrame.select(*cols) 查询操作
+
+  `df_persons.select("*")`
+
+- DataFrame.groupby(*cols) 分组操作
+
+  `df_persons.groupby("name")`
+
+- DataFrame.join(other, [on how]) 多表连接
+
+  默认是内连接
+
+  `df.join(df1,'name)`
+
+  `df.join(df1, ['name', 'age'])`
+
+  外连接：
+
+  `df.join(df2, df.name == df2.name, 'outer')`
+
+  `df.join(df2, [df.name == df3.name, df.age == df3.age], 'outer')`
+
+- 排序操作
+
+  
