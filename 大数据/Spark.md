@@ -186,7 +186,7 @@ sqlContext = SQLContext(sc)
 **通过.csv文件创建DataFrame**
 
 ```python
-rdd_person = sc.textFile("persion.csv")
+rdd_person = sc.textFile("person.csv")
 rdd_table = rdd_person.map(lambda line : line.split(";"))
 
 # 定义schema
