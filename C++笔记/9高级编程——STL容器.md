@@ -1171,8 +1171,6 @@ map<int,int , MyCompare> m;
 
 ### priority_queue
 
-``
-
 ```C++
 template<
 	class T,
@@ -1189,3 +1187,4 @@ priority_queue<int, vector<int>, greater<int>> pq;
 - pop()：移除队头元素
 - push()：插入元素，插入后会自动重新排序
 
+ 
