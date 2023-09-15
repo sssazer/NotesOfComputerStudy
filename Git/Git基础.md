@@ -488,6 +488,15 @@ ref可以是分支、tag，不指定的话默认是HEAD当前位置
 
   `git pull --allow-unrelated-histories`
 
+- `error: could not apply...`  `both modified`
+
+  这是由于两个版本在同一个文件的同一部分中出现了无法自动解决的冲突
+
+  1. `git status` 查看冲突出现的文件
+  2. 打开相应文件，会用 `<<<<HEAD`标记冲突的位置，之后是冲突的两个版本的内容，用`======`分隔，以`>>>>>>branch-name`结束
+  3. 手动指定最终要保存的内容，并将上述标记符号全部删除
+  4. `git add` `git commit` 重新提交
+
 ### 4.3.4 git push
 
 **无参数用法**
