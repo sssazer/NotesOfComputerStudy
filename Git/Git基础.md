@@ -544,3 +544,22 @@ ref可以是分支、tag，不指定的话默认是HEAD当前位置
 ### 4.3.5 删除远程分支
 
 `git push origin :foo`删除远程仓库的foo分支
+
+# 5. 从0开始上传笔记
+
+1. git bash中定位到要上传的文件夹中
+
+2. 输入：`git init` 将该文件夹初始化为一个git文件夹
+
+3. 此时路径右边会有一个括号，里面写的是当前所在分支，如果是main直接进行下一步
+
+   如果是master，执行`git checkout -b main`
+
+4. 在github或者gitee上创建仓库，创建完毕后进入仓库主页，并复制网址
+
+   执行`git remote add origin url` url就是复制的仓库地址
+
+   示例：`git remote add origin https://github.com/sssazer/hello-world`
+
+5. 
+
