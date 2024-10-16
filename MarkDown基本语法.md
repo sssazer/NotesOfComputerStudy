@@ -39,7 +39,7 @@ void main(){
 #这是一个python代码块
 print("HelloWorld")
 ```
-*** 
+***
 分割线
 # 大片的空白
 1. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;空    格(中间打再多空格也只会显示一个)
